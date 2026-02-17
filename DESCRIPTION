@@ -1,0 +1,51 @@
+Package: ldaOptim
+Type: Package
+Title: Systematic Parameter Optimization for LDA Topic Modeling
+Version: 0.1.0
+Authors@R: c(
+    person("Ayse D.", "Lokmanoglu", role = c("aut", "cre"), email = "alokman@bu.edu"),
+    person("Dror", "Walter", role = "aut"),
+    person("Yotam", "Ophir", role = "aut")
+  )
+Description: Provides systematic optimization and fitting workflow for Latent 
+    Dirichlet Allocation (LDA) topic modeling. Implements cross-validation for 
+    alpha parameter optimization, multiple evaluation metrics (Griffiths2004, 
+    CaoJuan2009, Arun2010, Deveaud2014) for finding optimal number of topics (Murzintcev, N., 2020), 
+    parallel model fitting, and comprehensive Excel export functionality. Based 
+    on methodology from Jacobi et al. (2016) and provides a modern replacement 
+    for the deprecated ldatuning package. Users should preprocess their text data 
+    into a DocumentTermMatrix before using this package.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.0.0)
+Imports:
+    parallel,
+    doParallel,
+    foreach,
+    topicmodels,
+    ggplot2,
+    scales,
+    stringr,
+    slam,
+    Rmpfr,
+    reshape2,
+    ggpubr,
+    dplyr,
+    tidyr,
+    tidytext,
+    openxlsx
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    gutenbergr,
+    quanteda,
+    cld2,
+    stopwords
+VignetteBuilder: knitr
+URL: https://github.com/aysedeniz09/ldaOptim
+BugReports: https://github.com/aysedeniz09/ldaOptim/issues
