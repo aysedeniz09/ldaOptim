@@ -1,0 +1,249 @@
+---
+title: "ldaOptim Workflow: Systematic LDA Parameter Optimization"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ldaOptim-workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Overview
+
+`ldaOptim` provides a systematic workflow for optimizing Latent Dirichlet Allocation (LDA) topic models. The package implements two-stage parameter optimization: first finding the optimal alpha hyperparameter via cross-validation, then identifying the optimal number of topics using four established metrics. This approach follows the methodology of Jacobi et al. (2016) and provides a modern replacement for the deprecated `ldatuning` package.
+
+The workflow has six steps:
+
+1. Preprocess raw text into a `DocumentTermMatrix`
+2. Find optimal alpha via cross-validation (`lda_find_alpha`)
+3. Find optimal number of topics (`lda_find_topics`)
+4. Fit the final model (`lda_run_models`)
+5. Inspect topics (`get_top_words`, `get_frex_words`, `get_top_docs`)
+6. Export results (`export_lda_results`)
+
+## Required Packages
+
+```{r setup}
+library(ldaOptim)
+library(tidytext)
+library(dplyr)
+library(ggplot2)
+library(stopwords)
+library(quanteda)
+library(topicmodels)
+```
+
+---
+
+## Step 0: Preprocess Text Data
+
+All `ldaOptim` functions take a **`DocumentTermMatrix` in topicmodels format** as their primary input. This is different from a raw quanteda DFM or a `tm` package DTM — the conversion step at the end of this section is required.
+
+Your input data should have at minimum two columns: a document index (`index`) and a text column (`text`).
+
+```{r preprocess}
+# --- Sampling (adjust n as needed) ---
+data3 <- data2 |>
+  distinct(text, .keep_all = TRUE) |>
+  slice_sample(n = 100000)          # adjust sample size for your corpus
+
+# --- Stopwords ---
+mystopwords <- c(
+  stopwords("en"),
+  stopwords(source = "smart"),
+  "posted", "quote", "http", "click", "image",
+  "things", "thing", "read", "post",
+  "thread", "threads"               # add domain-specific stopwords here
+)
+mystopwords <- unique(tolower(mystopwords))
+
+# --- Tokenize and clean ---
+tidy_data <- data3 |>
+  unnest_tokens(word, text) |>
+  anti_join(data.frame(word = mystopwords), by = "word") |>
+  mutate(nchar = nchar(word)) |>
+  filter(nchar > 2) |>                        # remove very short words
+  filter(!grepl("[0-9]{1}", word)) |          # remove numbers
+  filter(!grepl("\\W", word))                 # remove non-letter characters
+
+# --- TF-IDF filtering ---
+# Remove words that appear in too many or too few documents
+maxndoc <- 0.5    # word must appear in fewer than 50% of documents
+minndoc <- 0.0005 # word must appear in more than 0.05% of documents
+
+templength <- length(unique(tidy_data$index))
+
+good_common_words <- tidy_data |>
+  count(index, word, sort = TRUE) |>
+  group_by(word) |>
+  summarize(doc_freq = n() / templength) |>
+  filter(doc_freq < maxndoc) |>
+  filter(doc_freq > minndoc)
+
+tidy_data_pruned <- tidy_data |>
+  inner_join(good_common_words, by = "word")
+
+# --- Inspect top words before proceeding ---
+tidy_data_pruned |>
+  group_by(word) |>
+  summarise(n = n()) |>
+  arrange(desc(n)) |>
+  mutate(word = reorder(word, n)) |>
+  slice_max(n, n = 50) |>
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(title = "Top 50 words", y = NULL)
+```
+
+> **Stop here** and inspect the top words plot. If domain-specific noise words appear, add them to `mystopwords` and re-run before continuing.
+
+```{r create-dtm}
+# --- Step 1: Create a quanteda DFM from tidy tokens ---
+tidy_dfm <- tidy_data_pruned |>
+  count(index, word) |>
+  cast_dfm(index, word, n)
+
+# --- Step 2: Convert to topicmodels-format DocumentTermMatrix ---
+# full_data is a DocumentTermMatrix (DTM) — this is the object passed to 
+# all ldaOptim functions (lda_find_alpha, lda_find_topics, lda_run_models)
+full_data <- convert(tidy_dfm, to = "topicmodels")
+
+# Verify the object
+class(full_data)  # "DocumentTermMatrix"
+dim(full_data)    # rows = documents, columns = terms
+```
+
+> **Already have a DTM?** If you have an existing `DocumentTermMatrix` from the `tm` package or a previously saved topicmodels object, you can use it directly — skip the preprocessing above and pass your DTM straight to `lda_find_alpha()`. Note that quanteda DFM objects must always be converted first with `convert(dfm, to = "topicmodels")`.
+
+---
+
+## Step 1: Find Optimal Alpha
+
+The alpha hyperparameter controls document-topic density. Lower alpha values produce sparse, focused distributions; higher values produce more diffuse distributions. `lda_find_alpha()` uses k-fold cross-validation across a range of topic numbers to find the alpha that minimizes perplexity.
+
+```{r find-alpha}
+alpha_results <- lda_find_alpha(
+  dtm             = full_data,       # DocumentTermMatrix from Step 0
+  candidate_alpha = c(10, 5, 2, 1),
+  candidate_k     = c(2, seq(5, 100, by = 5), 125, 150, 175, 200),
+  folds           = 5,
+  seed            = 123
+)
+
+head(alpha_results)
+```
+
+### Visualize Alpha Results
+
+```{r plot-alpha, fig.width=7, fig.height=5}
+# Cross-validation perplexity curves by alpha value
+plot_alpha_crossval(alpha_results)
+
+# Smoothed perplexity curves
+plot_alpha_smooth(alpha_results)
+
+# Second derivative to identify the elbow point for a given alpha
+plot_alpha_second_derivative(alpha_results, alpha_value = 1)
+```
+
+Use the second derivative plot to identify the "elbow" — the K where adding more topics yields diminishing returns. Select your alpha value based on which curve shows the clearest elbow.
+
+---
+
+## Step 2: Find Optimal Number of Topics
+
+With alpha selected, `lda_find_topics()` fits models across a range of K values and calculates four complementary metrics:
+
+| Metric | Direction | Description |
+|---|---|---|
+| Griffiths2004 | MAXIMIZE | Log-likelihood based |
+| CaoJuan2009 | MINIMIZE | Cosine similarity (lower = more distinct topics) |
+| Arun2010 | MINIMIZE | KL divergence based |
+| Deveaud2014 | MAXIMIZE | Jensen-Shannon divergence |
+
+The optimal K is where the maximize metrics peak and the minimize metrics valley.
+
+```{r find-topics}
+topic_results <- lda_find_topics(
+  dtm     = full_data,               # DocumentTermMatrix from Step 0
+  topics  = seq(10, 200, by = 10),
+  method  = "Gibbs",
+  control = list(seed = 123, keep = 50),
+  verbose = TRUE
+)
+
+head(topic_results)
+```
+
+### Visualize Topic Metrics
+
+```{r plot-topics, fig.width=7, fig.height=5}
+plot_topics_metrics(topic_results)
+```
+
+All four metrics are normalized to [0,1] and plotted together. Select the K where metrics converge.
+
+---
+
+## Step 3: Fit Final Model
+
+With optimal alpha and K identified, fit the final model. `lda_run_models()` accepts multiple K values if you want to compare solutions side by side.
+
+```{r run-models}
+# alpha = 1 / (k * alpha_divisor)
+# e.g. alpha_divisor = 5, k = 50 gives alpha = 0.004
+models <- lda_run_models(
+  dtm           = full_data,         # DocumentTermMatrix from Step 0
+  k_values      = c(40, 50, 60),     # candidate K values from Step 2
+  alpha_divisor = 5,
+  method        = "Gibbs",
+  control       = list(seed = 123)
+)
+```
+
+---
+
+## Step 4: Inspect Topics
+
+```{r inspect}
+# Top words per topic (highest probability)
+top_words <- get_top_words(models[[1]], n = 10)
+head(top_words)
+
+# FREX words (frequency-exclusivity weighted — more distinctive)
+frex_words <- get_frex_words(models[[1]], n = 10)
+head(frex_words)
+
+# Top representative documents per topic
+top_docs <- get_top_docs(models[[1]], dtm = full_data, n = 5)
+head(top_docs)
+```
+
+---
+
+## Step 5: Export Results
+
+`export_lda_results()` writes a comprehensive Excel workbook containing model diagnostics, topic-word distributions, and document-topic assignments.
+
+```{r export}
+export_lda_results(
+  model    = models[[1]],
+  dtm      = full_data,
+  filename = "lda_results.xlsx"
+)
+```
+
+---
+
+## References
+
+Jacobi, C., van Atteveldt, W., & Welbers, K. (2016). Quantitative analysis of large amounts of journalistic texts using topic modelling. *Digital Journalism*, 4(1), 89–106.
+
+Murzintcev, N. (2020). *ldatuning: Tuning of the Latent Dirichlet Allocation Models Parameters*. R package.

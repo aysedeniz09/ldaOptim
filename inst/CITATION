@@ -1,0 +1,14 @@
+citHeader("To cite ldaOptim in publications use:")
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "ldaOptim: Systematic LDA Parameter Optimization",
+  author   = c(
+    person("Ayse", "Deniz"),
+    person("Dror", "Walter"),
+    person("Yotam", "Ophir")
+  ),
+  year     = "2026",
+  note     = "R package version 0.1.0",
+  url      = "https://github.com/aysedeniz09/ldaOptim"
+)

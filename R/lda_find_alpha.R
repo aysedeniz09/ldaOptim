@@ -106,7 +106,7 @@ lda_find_alpha <- function(dtm,
     perp <- topicmodels::perplexity(fitted, newdata = valid_set)
     
     print(paste0(
-      "✓ Completed [", j, "/", total_models, "] - Perplexity: ",
+      "Completed [", j, "/", total_models, "] - Perplexity: ",
       round(perp, 2)
     ))
     

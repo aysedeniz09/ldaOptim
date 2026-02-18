@@ -220,7 +220,7 @@ plot_alpha_second_derivative <- function(results,
 #'
 #' Creates a two-panel plot showing the four metrics for topic number optimization.
 #' Upper panel shows metrics to minimize (CaoJuan2009, Arun2010), lower panel shows
-#' metrics to maximize (Griffiths2004, Deveaud2014). All metrics are normalized to [0,1].
+#' metrics to maximize (Griffiths2004, Deveaud2014). All metrics are normalized to \[0,1\]
 #'
 #' @param results Data frame output from lda_find_topics()
 #' @param x_breaks Numeric vector for x-axis breaks (default: seq(0, 200, by = 5))
