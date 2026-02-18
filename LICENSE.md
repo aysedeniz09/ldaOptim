@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2026 ldaOptim authors
+Copyright (c) 2026 Ayse D. Lokmanoglu, Dror Walter and Yotam Ophir
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

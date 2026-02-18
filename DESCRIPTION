@@ -49,3 +49,4 @@ Suggests:
 VignetteBuilder: knitr
 URL: https://github.com/aysedeniz09/ldaOptim
 BugReports: https://github.com/aysedeniz09/ldaOptim/issues
+Config/testthat/edition: 3

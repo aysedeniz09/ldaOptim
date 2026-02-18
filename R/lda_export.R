@@ -35,19 +35,16 @@ get_top_words <- function(model, n_words = 30, output_file = NULL) {
   topwords <- mybeta[1:n_words, ]
   
   # Loop over all topics
-  for (i in 1:model@k) {
-    # Grab beta, select the right column, and choose top_n based on n_words
-    tempframe <- mybeta |> 
-      dplyr::select(i) |> 
-      dplyr::arrange(dplyr::desc(1)) |> 
-      dplyr::top_n(n_words)
-    
-    # Now that the order is correct - grab and vectorize words (rownames)
-    tempvec <- as.vector(rownames(tempframe))
-    
-    # Plug in to the i'th column
-    topwords[, i] <- tempvec[1:n_words]
-  }
+for (i in 1:model@k) {
+  col_name <- colnames(mybeta)[i]
+  tempframe <- mybeta |>
+    dplyr::arrange(dplyr::desc(.data[[col_name]])) |>
+    dplyr::slice_head(n = n_words) |>
+    dplyr::select(dplyr::all_of(col_name))
+  
+  tempvec <- as.vector(rownames(tempframe))
+  topwords[, i] <- tempvec[1:n_words]
+}
   
   # Add row names to look pretty
   rownames(topwords) <- c(1:n_words)
