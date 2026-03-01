@@ -41,6 +41,8 @@ alpha_results <- lda_find_alpha(
   folds = 5
 )
 plot_alpha_crossval(alpha_results)
+plot_alpha_smooth(alpha_results)
+plot_alpha_second_derivative(alpha_results, alpha_value = "10",                                          vline_at = 50)
 
 # 3. Find optimal number of topics
 topic_results <- lda_find_topics(
@@ -191,7 +193,7 @@ alpha_results <- lda_find_alpha(
 # Visualize results
 plot_alpha_crossval(alpha_results)
 plot_alpha_smooth(alpha_results)
-plot_alpha_second_derivative(alpha_results, alpha_value = "10")
+plot_alpha_second_derivative(alpha_results, alpha_value = "10",                                          vline_at = 50)
 ```
 
 ### Stage 2: Topic Number Optimization

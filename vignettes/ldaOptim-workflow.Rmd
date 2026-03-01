@@ -150,7 +150,7 @@ plot_alpha_crossval(alpha_results)
 plot_alpha_smooth(alpha_results)
 
 # Second derivative to identify the elbow point for a given alpha
-plot_alpha_second_derivative(alpha_results, alpha_value = 1)
+plot_alpha_second_derivative(alpha_results, alpha_value = 1, vline_at = 50)
 ```
 
 Use the second derivative plot to identify the "elbow" — the K where adding more topics yields diminishing returns. Select your alpha value based on which curve shows the clearest elbow.
