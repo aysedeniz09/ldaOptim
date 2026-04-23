@@ -11,7 +11,7 @@
 
 `ldaOptim` provides a complete, systematic workflow for Latent Dirichlet Allocation (LDA) topic modeling in R. The package addresses the critical challenge of parameter optimization by implementing rigorous cross-validation methods for both alpha (topic concentration) and k (number of topics) parameters. It provides a modern replacement for the deprecated `ldatuning` package.
 
-The package includes functions for alpha optimization through cross-validation, topic number optimization using four complementary metrics (Griffiths2004, CaoJuan2009, Arun2010, Deveaud2014), parallel model fitting, publication-ready visualizations, and Excel export functionality for top words, FREX words, and top documents.
+The package includes functions for alpha optimization through cross-validation, topic number optimization using four complementary metrics (Griffiths2004, CaoJuan2009, Arun2010, Deveaud2014), parallel model fitting, publication-ready visualizations, optional numeric elbow-detection helpers to complement visual inspection, and Excel export functionality for top words, FREX words, and top documents.
 
 ## Installation
 
@@ -43,6 +43,7 @@ alpha_results <- lda_find_alpha(
 plot_alpha_crossval(alpha_results)
 plot_alpha_smooth(alpha_results)
 plot_alpha_second_derivative(alpha_results, alpha_value = "10", vline_at = 50)
+suggest_alpha_elbow(alpha_results)  # Optional: numeric elbow suggestion
 
 # 3. Find optimal number of topics
 topic_results <- lda_find_topics(
@@ -51,6 +52,7 @@ topic_results <- lda_find_topics(
   control = list(alpha = 5/50)  # Use optimal alpha from Stage 1
 )
 plot_topics_metrics(topic_results)
+suggest_topics_elbow(topic_results)  # Optional: numeric elbow per metric
 
 # 4. Fit final models
 models <- lda_run_models(
@@ -100,9 +102,6 @@ data2 <- data2 |> filter(CLD2 == "en")
 # Remove URLs
 url_pattern <- "(?:http[s]?://)?(?:www\\.)?[a-zA-Z0-9-]+\\.[a-zA-Z]{2,}(?:/\\S*)?"
 data2$text <- str_remove_all(data2$message, url_pattern)
-
-# Remove forum quotes
-data2$text <- gsub("Quote:.*?Originally Posted by.*?\\n", "", data2$text)
 
 # Filter by word count (remove outliers)
 data2$nwords <- str_count(data2$text, "\\w+")
@@ -195,6 +194,9 @@ plot_alpha_crossval(alpha_results)
 plot_alpha_smooth(alpha_results)
 plot_alpha_second_derivative(alpha_results, alpha_value = "10", vline_at = 50)
 
+# Optional: numeric elbow suggestion to complement visual inspection
+# Returns one row per alpha divisor with suggested k at the curve elbow
+suggest_alpha_elbow(alpha_results)
 ```
 
 ### Stage 2: Topic Number Optimization
@@ -212,6 +214,10 @@ topic_results <- lda_find_topics(
 
 # Visualize all four metrics
 plot_topics_metrics(topic_results)
+
+# Optional: numeric elbow suggestion per metric
+# The chord_distance column indicates how sharply defined each elbow is
+suggest_topics_elbow(topic_results)
 ```
 
 ### Stage 3: Fit Final Models
@@ -257,6 +263,8 @@ top_docs <- get_top_docs(models$k_50, doc_data = doc_data)
 ### Optimization
 - `lda_find_alpha()` - Cross-validation for alpha parameter
 - `lda_find_topics()` - Find optimal number of topics using 4 metrics
+- `suggest_alpha_elbow()` - Numeric elbow detection on the perplexity vs k curve
+- `suggest_topics_elbow()` - Numeric elbow detection per topic-optimization metric
 
 ### Modeling
 - `lda_run_models()` - Fit final LDA models at chosen k values
@@ -292,6 +300,10 @@ Implements four complementary metrics:
 - **Arun2010**: Symmetric KL divergence (minimize)
 - **Deveaud2014**: Inter-topic divergence (maximize)
 
+### Elbow Detection (Optional)
+
+Both `suggest_alpha_elbow()` and `suggest_topics_elbow()` implement the Kneedle algorithm (Satopää et al., 2011): after rescaling both axes to [0, 1], the elbow is identified as the point with maximum perpendicular distance from the chord connecting the first and last points of the curve. Each returned `chord_distance` serves as a sharpness diagnostic — larger values indicate a more clearly defined elbow. Elbow detection is inherently approximate and is intended to complement, not replace, visual inspection.
+
 ## Citation
 
 If you use this package in your research, please cite:
@@ -304,13 +316,17 @@ Lokmanoglu, A.D., Walter, D., & Ophir, Y. (2026). ldaOptim: Systematic
 
 ## References
 
-This package provides a modern replacement for the deprecated `ldatuning` package:
+This package provides a replacement for the deprecated `ldatuning` package:
 
 Murzintcev, N. (2020). ldatuning: Tuning of the Latent Dirichlet Allocation Models Parameters. R package version 1.0.2. https://CRAN.R-project.org/package=ldatuning (Archived)
 
 Methodology based on:
 
 Jacobi, C., van Atteveldt, W., & Welbers, K. (2016). Quantitative analysis of large amounts of journalistic texts using topic modelling. *Digital Journalism*, 4(1), 89-106. https://doi.org/10.1080/21670811.2015.1093271
+
+Elbow detection:
+
+Satopaa, V., Albrecht, J., Irwin, D., & Raghavan, B. (2011). Finding a "Kneedle" in a Haystack: Detecting Knee Points in System Behavior. *31st International Conference on Distributed Computing Systems Workshops*, 166-171. https://doi.org/10.1109/ICDCSW.2011.20
 
 ## Contributing
 
@@ -323,8 +339,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Authors
 
 - Ayse Deniz Lokmanoglu (Boston University)
-- Dror Walter
-- Yotam Ophir
+- Dror Walter (Georgia State University)
+- Yotam Ophir (University at Buffalo)
 
 ## Acknowledgments
 

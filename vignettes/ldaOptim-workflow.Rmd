@@ -28,6 +28,8 @@ The workflow has six steps:
 5. Inspect topics (`get_top_words`, `get_frex_words`, `get_top_docs`)
 6. Export results (`export_lda_results`)
 
+Steps 2 and 3 include optional numeric elbow-detection helpers (`suggest_alpha_elbow`, `suggest_topics_elbow`) to complement the visual plots.
+
 ## Required Packages
 
 ```{r setup}
@@ -150,10 +152,26 @@ plot_alpha_crossval(alpha_results)
 plot_alpha_smooth(alpha_results)
 
 # Second derivative to identify the elbow point for a given alpha
-plot_alpha_second_derivative(alpha_results, alpha_value = 1, vline_at = 50)
+plot_alpha_second_derivative(alpha_results, alpha_value = "1", vline_at = 50)
 ```
 
 Use the second derivative plot to identify the "elbow" — the K where adding more topics yields diminishing returns. Select your alpha value based on which curve shows the clearest elbow.
+
+### Optional: Numeric Elbow Suggestion
+
+For users who want a numeric companion to the visual plots, `suggest_alpha_elbow()` applies the Kneedle algorithm (Satopää et al., 2011) to the cross-validation curve. For each alpha divisor, it returns the k at the point of maximum perpendicular distance from the chord connecting the first and last points.
+
+```{r suggest-alpha-elbow}
+suggest_alpha_elbow(alpha_results)
+```
+
+The function returns one row per alpha divisor with:
+
+- `elbow_k`: suggested k at the curve elbow
+- `elbow_perplexity`: perplexity at that k
+- `chord_distance`: a sharpness diagnostic — larger values indicate a more clearly defined elbow
+
+An overall recommendation (the alpha with the lowest perplexity at its elbow) is printed via `message()`. Elbow detection is inherently approximate — use this as one input alongside the three visual plots, not as a replacement.
 
 ---
 
@@ -189,6 +207,18 @@ plot_topics_metrics(topic_results)
 ```
 
 All four metrics are normalized to [0,1] and plotted together. Select the K where metrics converge.
+
+### Optional: Numeric Elbow Suggestion
+
+`suggest_topics_elbow()` applies the same Kneedle approach to each metric curve individually. The method is direction-agnostic — it works identically for metrics that should be minimized (CaoJuan2009, Arun2010) and maximized (Griffiths2004, Deveaud2014).
+
+```{r suggest-topics-elbow}
+suggest_topics_elbow(topic_results)
+```
+
+The function returns one row per metric with the suggested `elbow_k`, the metric value at that point, and a `chord_distance` sharpness diagnostic. A consensus message prints the range and median of elbow suggestions across metrics.
+
+Because the four metrics frequently disagree, this output is best read together with the `plot_topics_metrics()` plot: metrics with high `chord_distance` values contribute stronger signals, while metrics with low values may have curves too flat or too noisy for reliable elbow detection.
 
 ---
 
@@ -247,3 +277,5 @@ export_lda_results(
 Jacobi, C., van Atteveldt, W., & Welbers, K. (2016). Quantitative analysis of large amounts of journalistic texts using topic modelling. *Digital Journalism*, 4(1), 89–106.
 
 Murzintcev, N. (2020). *ldatuning: Tuning of the Latent Dirichlet Allocation Models Parameters*. R package.
+
+Satopaa, V., Albrecht, J., Irwin, D., & Raghavan, B. (2011). Finding a "Kneedle" in a Haystack: Detecting Knee Points in System Behavior. *31st International Conference on Distributed Computing Systems Workshops*, 166–171.
