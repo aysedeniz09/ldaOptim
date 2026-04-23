@@ -13,10 +13,10 @@ Description: Provides systematic optimization and fitting workflow for Latent
     CaoJuan2009, Arun2010, Deveaud2014) for finding optimal number of topics (Murzintcev, N., 2020), 
     parallel model fitting, and comprehensive Excel export functionality. Based 
     on methodology from Jacobi et al. (2016) and provides a modern replacement 
-    for the deprecated ldatuning package. Users should preprocess their text data 
-    into a DocumentTermMatrix before using this package.
+    for the deprecated ldatuning package. This package operates on a DocumentTermMatrix input, which users construct from their raw text data using their preferred text preprocessing and tokenization methods.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
