@@ -17,11 +17,10 @@ Description: Provides systematic optimization and fitting workflow for Latent
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-US
-LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Depends:
-    R (>= 4.0.0)
+    R (>= 4.1.0)
 Imports:
     parallel,
     doParallel,
