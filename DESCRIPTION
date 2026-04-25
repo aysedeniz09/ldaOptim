@@ -4,8 +4,8 @@ Title: Systematic Parameter Optimization for LDA Topic Modeling
 Version: 0.1.0
 Authors@R: c(
     person("Ayse D.", "Lokmanoglu", role = c("aut", "cre"), email = "alokman@bu.edu"),
-    person("Dror", "Walter", role = c("aut", "cre")),
-    person("Yotam", "Ophir", role = c("aut", "cre"))
+    person("Dror", "Walter", role = c("aut")),
+    person("Yotam", "Ophir", role = c("aut"))
   )
 Description: Provides systematic optimization and fitting workflow for Latent 
     Dirichlet Allocation (LDA) topic modeling. Implements cross-validation for 
