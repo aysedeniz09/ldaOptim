@@ -265,8 +265,8 @@ plot_topics_metrics <- function(results,
                                      color = metric, shape = metric)) +
     ggplot2::geom_line(linewidth = 1) +
     ggplot2::geom_point(size = 3) +
-    ggplot2::scale_color_manual(values = c("CaoJuan2009" = "#bb7438",
-                                           "Arun2010"    = "#7f64b9")) +
+    ggplot2::scale_color_manual(values = c("CaoJuan2009" = "#e07b39",
+                                           "Arun2010"    = "#2c5f8a")) +
     ggplot2::scale_shape_manual(values = c("CaoJuan2009" = 17, "Arun2010" = 15)) +
     ggplot2::scale_x_continuous(breaks = x_breaks) +
     ggplot2::labs(x = NULL, y = "minimize") +
@@ -281,14 +281,14 @@ plot_topics_metrics <- function(results,
                                      color = metric, shape = metric)) +
     ggplot2::geom_line(linewidth = 1) +
     ggplot2::geom_point(size = 3) +
-    ggplot2::scale_color_manual(values = c("Griffiths2004" = "#72ac5c",
-                                           "Deveaud2014"   = "#b94b75")) +
+    ggplot2::scale_color_manual(values = c("Griffiths2004" = "#c9a227",
+                                           "Deveaud2014"   = "#8a2c5f")) +
     ggplot2::scale_shape_manual(values = c("Griffiths2004" = 16, "Deveaud2014" = 3)) +
     ggplot2::scale_x_continuous(breaks = x_breaks) +
     ggplot2::labs(x = "number of topics", y = "maximize") +
     ggplot2::theme_bw() +
     ggplot2::theme(text = ggplot2::element_text(size = 8),
-                   legend.position = "right",
+                   legend.position = "top",
                    legend.title    = ggplot2::element_blank())
   
   # Combine plots
