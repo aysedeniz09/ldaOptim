@@ -220,6 +220,23 @@ plot_topics_metrics(topic_results)
 suggest_topics_elbow(topic_results)
 ```
 
+```r
+#optional visualization to combine all plots
+p1 <- plot_alpha_crossval(alpha_results)
+p2 <- plot_alpha_smooth(alpha_results)
+p3 <- plot_alpha_second_derivative(alpha_results, alpha_value = "10", vline_at = 50)
+p4 <- plot_topics_metrics(topic_results)
+
+ggarrange(p1, p2, p3, p4, ncol = 2, nrow = 2,
+          labels = c("A", "B", "C", "D"))
+
+ggsave(paste0(Output_folder, Project_name, "ALL-Metrics.jpeg"),
+       bg = "white",
+       width = 12, height = 8, dpi = 300)
+
+```
+
+
 ### Stage 3: Fit Final Models
 
 Fit LDA models at your chosen optimal k values:
