@@ -236,7 +236,6 @@ ggsave(paste0(Output_folder, Project_name, "ALL-Metrics.jpeg"),
 
 ```
 
-
 ### Stage 3: Fit Final Models
 
 Fit LDA models at your chosen optimal k values:

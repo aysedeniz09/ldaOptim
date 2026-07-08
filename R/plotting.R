@@ -204,7 +204,7 @@ plot_alpha_second_derivative <- function(results,
       axis.text.y = ggplot2::element_text(family = "Times New Roman"),
       axis.title.x = ggplot2::element_text(vjust = -0.25, size = 10, family = "Times New Roman"),
       axis.title.y = ggplot2::element_text(vjust = -0.25, size = 10, family = "Times New Roman"),
-      legend.position = "bottom",
+      legend.position = "top",
       legend.box = "vertical",
       legend.margin = ggplot2::margin(),
       legend.key = ggplot2::element_rect(fill = "white"),
@@ -272,7 +272,7 @@ plot_topics_metrics <- function(results,
     ggplot2::labs(x = NULL, y = "minimize") +
     ggplot2::theme_bw() +
     ggplot2::theme(text = ggplot2::element_text(size = 8),
-                   legend.position = "right",
+                   legend.position = "top",
                    legend.title    = ggplot2::element_blank())
   
   # Plot 2: Maximize metrics
