@@ -27,7 +27,7 @@ lda_run_models(
 \item{ncores}{Integer number of cores to use. If NULL, uses detectCores() - 2 (default: NULL)}
 }
 \value{
-A named list of fitted LDA models, where names are "k_\link[scales:number]{scales::number}"
+A named list of fitted LDA models, where names are "k_\link[scales:number]{number}"
 }
 \description{
 Fits LDA models in parallel for specific k values after optimization is complete.

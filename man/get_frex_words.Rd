@@ -4,7 +4,13 @@
 \alias{get_frex_words}
 \title{Export FREX Words from LDA Model}
 \usage{
-get_frex_words(model, n_words = 30, weight = 0.3, output_file = NULL)
+get_frex_words(
+  model,
+  n_words = 30,
+  weight = 0.3,
+  output_file = NULL,
+  format = "xlsx"
+)
 }
 \arguments{
 \item{model}{A fitted LDA model from the topicmodels package}
@@ -13,7 +19,9 @@ get_frex_words(model, n_words = 30, weight = 0.3, output_file = NULL)
 
 \item{weight}{Weight parameter for FREX calculation (default: 0.3)}
 
-\item{output_file}{Path for output Excel file. If NULL, does not save (default: NULL)}
+\item{output_file}{Base path/prefix for output file, without extension. If NULL, does not save (default: NULL)}
+
+\item{format}{Output format: "xlsx", "csv", or "rda" (default: "xlsx")}
 }
 \value{
 A data frame with topics as columns and top FREX words as rows

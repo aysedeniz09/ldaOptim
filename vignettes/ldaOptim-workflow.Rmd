@@ -72,7 +72,7 @@ tidy_data <- data3 |>
   anti_join(data.frame(word = mystopwords), by = "word") |>
   mutate(nchar = nchar(word)) |>
   filter(nchar > 2) |>                        # remove very short words
-  filter(!grepl("[0-9]{1}", word)) |          # remove numbers
+  filter(!grepl("[0-9]{1}", word)) |>         # remove numbers
   filter(!grepl("\\W", word))                 # remove non-letter characters
 
 # --- TF-IDF filtering ---
@@ -120,9 +120,17 @@ full_data <- convert(tidy_dfm, to = "topicmodels")
 # Verify the object
 class(full_data)  # "DocumentTermMatrix"
 dim(full_data)    # rows = documents, columns = terms
+
+# --- Step 3: Keep document metadata for later export ---
+# doc_data pairs each document's index with its original text. It's not used
+# for modeling, but Step 5 (get_top_docs / export_lda_results) needs it to
+# look up the original text behind each top-scoring document.
+doc_data <- data3 |>
+  select(index, text) |>
+  filter(index %in% rownames(full_data))
 ```
 
-> **Already have a DTM?** If you have an existing `DocumentTermMatrix` from the `tm` package or a previously saved topicmodels object, you can use it directly — skip the preprocessing above and pass your DTM straight to `lda_find_alpha()`. Note that quanteda DFM objects must always be converted first with `convert(dfm, to = "topicmodels")`.
+> **Already have a DTM?** If you have an existing `DocumentTermMatrix` from the `tm` package or a previously saved topicmodels object, you can use it directly — skip the preprocessing above and pass your DTM straight to `lda_find_alpha()`. Note that quanteda DFM objects must always be converted first with `convert(dfm, to = "topicmodels")`. You'll still need a `doc_data` data frame with `index` and `text` columns for Step 5.
 
 ---
 
@@ -227,8 +235,8 @@ Because the four metrics frequently disagree, this output is best read together 
 With optimal alpha and K identified, fit the final model. `lda_run_models()` accepts multiple K values if you want to compare solutions side by side.
 
 ```{r run-models}
-# alpha = 1 / (k * alpha_divisor)
-# e.g. alpha_divisor = 5, k = 50 gives alpha = 0.004
+# alpha = alpha_divisor / k
+# e.g. alpha_divisor = 5, k = 50 gives alpha = 0.1
 models <- lda_run_models(
   dtm           = full_data,         # DocumentTermMatrix from Step 0
   k_values      = c(40, 50, 60),     # candidate K values from Step 2
@@ -242,17 +250,19 @@ models <- lda_run_models(
 
 ## Step 4: Inspect Topics
 
+`get_top_docs()` needs the `doc_data` data frame created in Step 0 (it looks up each top-scoring document's original text using the `index` column) — pass it as `doc_data`, not the DTM itself.
+
 ```{r inspect}
 # Top words per topic (highest probability)
-top_words <- get_top_words(models[[1]], n = 10)
+top_words <- get_top_words(models[[1]], n_words = 10)
 head(top_words)
 
 # FREX words (frequency-exclusivity weighted — more distinctive)
-frex_words <- get_frex_words(models[[1]], n = 10)
+frex_words <- get_frex_words(models[[1]], n_words = 10)
 head(frex_words)
 
 # Top representative documents per topic
-top_docs <- get_top_docs(models[[1]], dtm = full_data, n = 5)
+top_docs <- get_top_docs(models[[1]], doc_data = doc_data, n_docs = 5)
 head(top_docs)
 ```
 
@@ -260,13 +270,19 @@ head(top_docs)
 
 ## Step 5: Export Results
 
-`export_lda_results()` writes a comprehensive Excel workbook containing model diagnostics, topic-word distributions, and document-topic assignments.
+`export_lda_results()` writes top words, FREX words, and top documents to separate files, prefixed and named using `output_prefix` and `output_dir`. Like `get_top_docs()`, it needs `doc_data`, not the DTM.
+
+By default, results are saved as Excel (`.xlsx`); pass `format = "csv"` or `format = "rda"` if you'd rather work with those instead.
 
 ```{r export}
 export_lda_results(
-  model    = models[[1]],
-  dtm      = full_data,
-  filename = "lda_results.xlsx"
+  model         = models[[1]],
+  doc_data      = doc_data,
+  n_words       = 30,
+  n_docs        = 30,
+  output_prefix = "lda_results",
+  output_dir    = ".",
+  format        = "xlsx"   # "xlsx", "csv", or "rda"
 )
 ```
 

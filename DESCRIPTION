@@ -18,7 +18,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends:
     R (>= 4.1.0)
 Imports:
@@ -49,3 +48,4 @@ VignetteBuilder: knitr
 URL: https://github.com/aysedeniz09/ldaOptim
 BugReports: https://github.com/aysedeniz09/ldaOptim/issues
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

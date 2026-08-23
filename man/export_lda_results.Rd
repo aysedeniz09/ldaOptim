@@ -2,7 +2,7 @@
 % Please edit documentation in R/lda_export.R
 \name{export_lda_results}
 \alias{export_lda_results}
-\title{Export All LDA Results to Excel}
+\title{Export All LDA Results}
 \usage{
 export_lda_results(
   model,
@@ -12,7 +12,8 @@ export_lda_results(
   n_words = 30,
   n_docs = 30,
   output_prefix,
-  output_dir = "."
+  output_dir = ".",
+  format = "xlsx"
 )
 }
 \arguments{
@@ -31,11 +32,13 @@ export_lda_results(
 \item{output_prefix}{Prefix for output files (e.g., "myproject_k50")}
 
 \item{output_dir}{Directory for output files (default: current directory)}
+
+\item{format}{Output format for all three files: "xlsx", "csv", or "rda" (default: "xlsx")}
 }
 \value{
 A list containing three data frames: top_words, frex_words, top_docs
 }
 \description{
 Convenience wrapper that exports top words, FREX words, and top documents
-for a fitted LDA model to separate Excel files.
+for a fitted LDA model to separate files.
 }

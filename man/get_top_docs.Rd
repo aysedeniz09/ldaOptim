@@ -10,7 +10,8 @@ get_top_docs(
   index_col = "index",
   text_col = "text",
   n_docs = 30,
-  output_file = NULL
+  output_file = NULL,
+  format = "xlsx"
 )
 }
 \arguments{
@@ -24,12 +25,13 @@ get_top_docs(
 
 \item{n_docs}{Number of top documents to extract per topic (default: 30)}
 
-\item{output_file}{Path for output Excel file. If NULL, does not save (default: NULL)}
+\item{output_file}{Base path/prefix for output file, without extension. If NULL, does not save (default: NULL)}
+
+\item{format}{Output format: "xlsx", "csv", or "rda" (default: "xlsx")}
 }
 \value{
 A data frame with topics as columns and top documents as rows
 }
 \description{
-Extracts the top n documents for each topic based on gamma (document-topic probabilities)
-and exports to Excel.
+Extracts the top n documents for each topic based on gamma (document-topic probabilities).
 }

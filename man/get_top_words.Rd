@@ -4,19 +4,20 @@
 \alias{get_top_words}
 \title{Export Top Words from LDA Model}
 \usage{
-get_top_words(model, n_words = 30, output_file = NULL)
+get_top_words(model, n_words = 30, output_file = NULL, format = "xlsx")
 }
 \arguments{
 \item{model}{A fitted LDA model from the topicmodels package}
 
 \item{n_words}{Number of top words to extract per topic (default: 30)}
 
-\item{output_file}{Path for output Excel file. If NULL, does not save (default: NULL)}
+\item{output_file}{Base path/prefix for output file, without extension. If NULL, does not save (default: NULL)}
+
+\item{format}{Output format: "xlsx", "csv", or "rda" (default: "xlsx")}
 }
 \value{
 A data frame with topics as columns and top words as rows
 }
 \description{
-Extracts the top n words for each topic based on beta (word-topic probabilities)
-and exports to Excel.
+Extracts the top n words for each topic based on beta (word-topic probabilities).
 }

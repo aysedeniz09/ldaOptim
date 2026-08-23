@@ -255,10 +255,10 @@ model_50 <- models$k_50
 
 ### Stage 4: Export Results
 
-Export top words, FREX words, and top documents to Excel:
+Export top words, FREX words, and top documents. Results can be saved as Excel (.xlsx, default), CSV, or RDA using the format argument:
 
 ```r
-# Export all results for one model
+# Export all results for one model (defaults to xlsx)
 export_lda_results(
   model = models$k_50,
   doc_data = doc_data,
@@ -268,10 +268,30 @@ export_lda_results(
   output_dir = "output/"
 )
 
+# Or choose a different format
+export_lda_results(
+  model = models$k_50,
+  doc_data = doc_data,
+  n_words = 30,
+  n_docs = 30,
+  output_prefix = "myproject_k50",
+  output_dir = "output/",
+  format = "csv"   # "xlsx", "csv", or "rda"
+)
+
 # Or export selectively
 top_words <- get_top_words(models$k_50, n_words = 30)
 frex_words <- get_frex_words(models$k_50, n_words = 30)
 top_docs <- get_top_docs(models$k_50, doc_data = doc_data)
+
+# Selective export functions also accept output_file (without extension) and format
+top_docs <- get_top_docs(
+  models$k_50,
+  doc_data = doc_data,
+  n_docs = 30,
+  output_file = "output/myproject_k50_TopDocs_k50",
+  format = "rda"
+)
 ```
 
 ## Key Functions
